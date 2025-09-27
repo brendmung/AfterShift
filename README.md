@@ -23,14 +23,14 @@ The application allows users to define custom report structures via JSON templat
 
 ### For Users (Installing the App)
 
-1.  Download the latest `app-release.apk` from the [Releases page](https://github.com/brendmung/AfterShift/releases).
+1.  Download the latest `.apk` from the [Releases page](https://github.com/brendmung/AfterShift/releases).
 2.  Install the APK on your Android device.
 
 ### For Developers (Building from Source)
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/tricenc/AfterShift-Report.git
+    git clone https://github.com/tricenc/AfterShift.git
     ```
 2.  **Open in Android Studio:**
     Open the cloned directory as an existing Android Studio project.
