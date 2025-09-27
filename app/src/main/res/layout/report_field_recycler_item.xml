@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="4dp"
+    android:layout_marginBottom="4dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical">
+
+    <!-- Drag Handle -->
+    <ImageView
+        android:id="@+id/dragHandle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        android:contentDescription="Drag to reorder"
+        android:layout_marginEnd="8dp"
+        android:tint="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/fieldLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Label"
+        android:textSize="14sp"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="4dp" />
+
+    <EditText
+        android:id="@+id/fieldValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="Value"
+        android:textSize="14sp"
+        android:minHeight="40dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/deleteFieldButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="×"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:textColor="@android:color/white"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:layout_marginStart="4dp" />
+
+</LinearLayout>

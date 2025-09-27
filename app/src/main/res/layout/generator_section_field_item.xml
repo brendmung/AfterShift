@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                   android:layout_width="match_parent"
+                                   android:layout_height="wrap_content"
+                                   android:layout_marginStart="16dp"
+                                   android:layout_marginBottom="8dp"
+                                   app:cardCornerRadius="12dp"
+                                   app:cardElevation="1dp"
+                                   app:cardBackgroundColor="@color/surface_variant">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/fieldLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Label"
+            android:textSize="15sp"
+            android:textStyle="normal"
+            android:textColor="@color/text_secondary"
+            android:paddingEnd="12dp" />
+
+        <EditText
+            android:id="@+id/fieldValue"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:hint="Value"
+            android:textSize="15sp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
+            android:background="@drawable/rounded_edit_text_background"
+            android:inputType="text" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>

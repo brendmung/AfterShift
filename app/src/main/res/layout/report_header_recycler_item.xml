@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="4dp"
+    android:layout_marginBottom="4dp"
+    android:background="@android:color/background_light"
+    android:gravity="center_vertical">
+
+    <!-- Drag Handle -->
+    <ImageView
+        android:id="@+id/dragHandle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        android:contentDescription="Drag to reorder"
+        android:layout_marginEnd="8dp"
+        android:tint="@android:color/darker_gray" />
+
+    <!-- Expand/Collapse Icon -->
+    <ImageView
+        android:id="@+id/expandIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/arrow_down_float"
+        android:contentDescription="Expand/Collapse"
+        android:layout_marginEnd="8dp"
+        android:tint="@android:color/black" />
+
+    <TextView
+        android:id="@+id/headerText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Section Header"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp"
+        android:minHeight="40dp"
+        android:gravity="center_vertical" />
+
+    <!-- Add Field Button -->
+    <Button
+        android:id="@+id/addFieldButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:text="+"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:textColor="@android:color/white"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:layout_marginEnd="4dp" />
+
+    <Button
+        android:id="@+id/deleteHeaderButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:text="×"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:textColor="@android:color/white"
+        android:minWidth="0dp"
+        android:minHeight="0dp" />
+
+</LinearLayout>

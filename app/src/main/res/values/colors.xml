@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modern Color Palette - Light Theme -->
+    <color name="primary">#1F1F1F</color>
+    <color name="primary_dark">#141414</color>
+    <color name="primary_light">#353535</color>
+    <color name="secondary">#10B981</color>
+    <color name="secondary_dark">#059669</color>
+    <color name="secondary_light">#34D399</color>
+    <color name="accent">#F59E0B</color>
+    <color name="accent_dark">#D97706</color>
+    <color name="accent_light">#FBBF24</color>
+    <color name="background">#FAFBFC</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F8FAFC</color>
+    <color name="surface_container">#F1F5F9</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="on_background">#0F172A</color>
+    <color name="on_surface">#334155</color>
+    <color name="on_surface_variant">#64748B</color>
+    <color name="outline">#E2E8F0</color>
+    <color name="outline_variant">#CBD5E1</color>
+    <color name="error">#EF4444</color>
+    <color name="error_container">#FEF2F2</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="on_error_container">#991B1B</color>
+    <!-- Text Colors -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_tertiary">#94A3B8</color>
+    <!-- Component Colors -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="header_background">#F8FAFC</color>
+    <color name="field_background">#FFFFFF</color>
+    <color name="field_background_disabled">#E0E0E0</color> <!-- NEW -->
+    <color name="divider">#E2E8F0</color>
+    <!-- Status Colors -->
+    <color name="success">#10B981</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#3B82F6</color>
+
+    <!-- Material 3 Color Roles - Light Theme (Remapped) -->
+    <color name="md_theme_light_primary">@color/primary</color>
+    <color name="md_theme_light_onPrimary">@color/on_primary</color>
+    <color name="md_theme_light_primaryContainer">#E0E7FF</color>
+    <color name="md_theme_light_onPrimaryContainer">@color/on_background</color>
+    <color name="md_theme_light_secondary">@color/secondary</color>
+    <color name="md_theme_light_onSecondary">@color/on_secondary</color>
+    <color name="md_theme_light_secondaryContainer">#D1FAE5</color>
+    <color name="md_theme_light_onSecondaryContainer">@color/on_background</color>
+    <color name="md_theme_light_tertiary">@color/primary_light</color>
+    <color name="md_theme_light_onTertiary">@color/on_primary</color>
+    <color name="md_theme_light_tertiaryContainer">#F3F4F6</color>
+    <color name="md_theme_light_onTertiaryContainer">@color/on_background</color>
+    <color name="md_theme_light_error">@color/error</color>
+    <color name="md_theme_light_onError">@color/on_error</color>
+    <color name="md_theme_light_errorContainer">@color/error_container</color>
+    <color name="md_theme_light_onErrorContainer">@color/on_error_container</color>
+    <color name="md_theme_light_background">@color/background</color>
+    <color name="md_theme_light_onBackground">@color/on_background</color>
+    <color name="md_theme_light_surface">@color/surface</color>
+    <color name="md_theme_light_onSurface">@color/on_surface</color>
+    <color name="md_theme_light_surfaceVariant">@color/surface_variant</color>
+    <color name="md_theme_light_onSurfaceVariant">@color/on_surface_variant</color>
+    <color name="md_theme_light_outline">@color/outline</color>
+    <color name="md_theme_light_outlineVariant">@color/outline_variant</color>
+    <!-- UI Component specific custom colors (using M3 roles or custom shades) -->
+    <color name="colorSectionHeaderBackground">@color/md_theme_light_primaryContainer</color>
+    <color name="colorSectionFieldBackground">@color/md_theme_light_tertiaryContainer</color>
+    <color name="colorErrorBackground">@color/md_theme_light_errorContainer</color>
+    <color name="colorEditTextBorder">@color/md_theme_light_outline</color>
+</resources>

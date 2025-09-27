@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AfterShift Report</string>
+    <string name="app_name_main_title">AfterShift</string>
+    <string name="report_count_format">%d Saved Reports</string>
+    <string name="report_count_format_placeholder">Loading reports...</string>
+    <string name="about_text">
+        AfterShift Report\n\n
+        Version: 1.0.0\n
+        Developed by: Tricenc\n\n
+        This app helps you generate and save daily reports, and send them via SMS or other messaging apps.
+    </string>
+</resources>
