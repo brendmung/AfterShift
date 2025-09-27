@@ -169,4 +169,3 @@ This example shows a simple template with a calculated field for **Net Sales**.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
