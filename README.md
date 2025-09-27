@@ -23,7 +23,7 @@ The application allows users to define custom report structures via JSON templat
 
 ### For Users (Installing the App)
 
-1.  Download the latest `app-release.apk` from the [Releases page]([link-to-releaseshttps://github.com/brendmung/AfterShift/releases].
+1.  Download the latest `app-release.apk` from the [Releases page](https://github.com/brendmung/AfterShift/releases).
 2.  Install the APK on your Android device.
 
 ### For Developers (Building from Source)
