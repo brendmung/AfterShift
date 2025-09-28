@@ -8,12 +8,12 @@
     <style>
 
         :root {
-            /* Light Theme Defaults */
+            /* Monochrome Light Theme */
             --bg-color: #e0e0e0; /* Base background */
             --surface-color: #f0f0f0; /* Slightly lighter surface for cards, chat */
-            --main-color: #000; /* Accent blue */
-            --main-color-dark: #357bd8;
-            --main-color-light: #7cb4f5;
+            --main-color: #444444; /* Primary accent dark grey */
+            --main-color-dark: #222222; /* Even darker grey for hover/active */
+            --main-color-light: #666666; /* Medium grey for headers */
             --light-shadow: #ffffff;
             --dark-shadow: #bebebe;
             --text-color: #333333;
@@ -21,27 +21,27 @@
             --input-bg: #e0e0e0;
             --code-bg: #222222; /* Dark for code blocks */
             --code-text: #eeeeee;
-            --error-color: #e53935;
-            --success-color: #43a047;
+            --error-color: #888888; /* A distinct grey for errors */
+            --success-color: #555555; /* A distinct grey for success */
             --border-color: #d0d0d0;
         }
 
         body.dark-theme {
-            /* Dark Theme Overrides */
+            /* Monochrome Dark Theme */
             --bg-color: #1e1e1e;
             --surface-color: #282828;
-            --main-color: #64B5F6; /* Slightly adjusted blue for dark theme contrast */
-            --main-color-dark: #42A5F5;
-            --main-color-light: #90CAF9;
+            --main-color: #cccccc; /* Primary accent light grey */
+            --main-color-dark: #aaaaaa; /* Medium grey for hover */
+            --main-color-light: #999999; /* Medium-light grey for headers */
             --light-shadow: #0f0f0f; /* Darker "light" shadow */
             --dark-shadow: #3a3a3a; /* Lighter "dark" shadow */
             --text-color: #e0e0e0;
-            --text-color-light: #ffffff;
+            --text-color-light: #0f0f0f;
             --input-bg: #1e1e1e;
             --code-bg: #000000;
             --code-text: #eeeeee;
-            --error-color: #ef5350;
-            --success-color: #66bb6a;
+            --error-color: #777777; /* A distinct grey for errors in dark theme */
+            --success-color: #999999; /* A distinct grey for success in dark theme */
             --border-color: #333333;
         }
 
@@ -532,14 +532,16 @@
             color: var(--code-text);
             padding: 20px;
             border-radius: 15px;
-            box-shadow: inset 2px 2px 5px var(--light-shadow), inset -3px -3px 7px var(--dark-shadow);
             font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
             white-space: pre-wrap;
             word-break: break-all;
             max-height: 400px;
             overflow-y: auto;
             margin-top: 20px;
             transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow);
         }
 
         /* Utility classes */
@@ -902,7 +904,8 @@
         // --- Theme Management ---
         function applyTheme(theme) {
             document.body.classList.toggle('dark-theme', theme === 'dark');
-            THEME_TOGGLE_ICON.textContent = theme === 'dark' ? '☀️' : '🌙';
+            // Use monochrome emojis for theme toggle icon
+            THEME_TOGGLE_ICON.textContent = theme === 'dark' ? '⚪' : '🌑';
             localStorage.setItem('theme', theme);
         }
 
@@ -940,7 +943,7 @@ Here's the detailed template structure:
         *   \`2\` (TYPE_SECTION_FIELD): Field nested under a header.
     *   \`internalId\` (String, required): Unique lowercase_underscore ID for this element across the *entire template*. Must be alphanumeric with underscores only (e.g., "total_sales"). Used in formats and calculations.
     *   \`displayLabel\` (String, required): Human-readable label shown in the app.
-    *   \`defaultValue\` (String, optional): Initial value for new reports. Can be \`""\`. Omit this key if value is empty.
+    *   \`defaultValue\` (String, optional): Initial value for new reports. Can be \`""\`. Omit this key if empty.
     *   \`inputType\` (String, required for TYPE_FIELD and TYPE_SECTION_FIELD): Controls keyboard and validation hint. MUST be one of:
         *   \`"text"\` (Default, for general text, capitalized sentences)
         *   \`"textMultiLine"\` (For longer notes, allows newlines)
@@ -1025,12 +1028,26 @@ I am ready to help you create, edit, chat about, understand, and generate templa
                 }
 
                 const data = await response.json();
-                const aiResponse = data.response;
-                displayMessage(aiResponse, 'ai');
-                chatHistory.push({ role: 'assistant', content: aiResponse });
+                const aiResponseRaw = data.response;
+                let aiResponseForDisplay = aiResponseRaw;
+
+                // Check if the response is *entirely* a code block
+                const isOnlyCodeBlock = /^```(.*?)[\s\S]*?```$/.test(aiResponseRaw.trim());
+
+                // If it's not *just* a code block, wrap the whole thing in *** for display
+                if (!isOnlyCodeBlock) {
+                    // Add stars only if they are not already present at the start/end
+                    if (!aiResponseRaw.trim().startsWith('***') || !aiResponseRaw.trim().endsWith('***')) {
+                        aiResponseForDisplay = `***${aiResponseRaw.trim()}***`;
+                    }
+                }
+
+                displayMessage(aiResponseForDisplay, 'ai');
+                // Store the raw response in history to maintain context without display formatting
+                chatHistory.push({ role: 'assistant', content: aiResponseRaw });
             } catch (error) {
                 console.error('Error calling AI API:', error);
-                displayMessage('Error: Could not connect to AI or API returned an error. Please check console.', 'ai');
+                displayMessage('***Error: Could not connect to AI or API returned an error. Please check console.***', 'ai');
             } finally {
                 SEND_CHAT_BTN.disabled = false;
                 SEND_CHAT_BTN.textContent = 'Send';
@@ -1048,8 +1065,42 @@ I am ready to help you create, edit, chat about, understand, and generate templa
         function displayMessage(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', sender);
-            const formattedText = text.replace(/```json\n([\s\S]*?)\n```/g, '<pre><code class="language-json">$1</code></pre>');
-            msgDiv.innerHTML = formattedText;
+            let contentToProcess = text;
+
+            // 1. Extract and temporarily replace code blocks
+            const codeBlockPlaceholder = "___CODE_BLOCK_PLACEHOLDER_";
+            const codeBlocks = [];
+            contentToProcess = contentToProcess.replace(/```(.*?)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+                const languageClass = lang.trim() ? `language-${lang.trim()}` : 'language-plaintext';
+                // Basic HTML escaping for content within code blocks
+                const escapedCode = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const index = codeBlocks.length;
+                codeBlocks.push(`<pre><code class="${languageClass}">${escapedCode}</code></pre>`);
+                return codeBlockPlaceholder + index + "___"; // Unique placeholder for each block
+            });
+
+            // 2. Escape HTML entities in the remaining text (plain text parts)
+            contentToProcess = contentToProcess.replace(/&/g, '&amp;')
+                                              .replace(/</g, '&lt;')
+                                              .replace(/>/g, '&gt;')
+                                              .replace(/"/g, '&quot;')
+                                              .replace(/'/g, '&#039;');
+
+            // 3. Convert basic Markdown to HTML in the escaped text
+            // Order matters: ***strong emphasis*** before **strong** before *emphasis*
+            contentToProcess = contentToProcess.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') // Bold and Italic
+                                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')          // Bold
+                                              .replace(/\*(.*?)\*/g, '<em>$1</em>')                     // Italic
+                                              .replace(/`(.*?)`/g, '<code>$1</code>');                 // Inline code
+
+            // 4. Convert newlines to <br> for display outside of code blocks.
+            // This happens after markdown conversion but before code block insertion.
+            contentToProcess = contentToProcess.replace(/\n/g, '<br>');
+
+            // 5. Insert code blocks back and finalize HTML
+            let finalHtml = contentToProcess.replace(new RegExp(codeBlockPlaceholder + '(\\d+)___', 'g'), (match, index) => codeBlocks[parseInt(index)]);
+
+            msgDiv.innerHTML = finalHtml;
             CHAT_MESSAGES_DIV.appendChild(msgDiv);
             CHAT_MESSAGES_DIV.scrollTop = CHAT_MESSAGES_DIV.scrollHeight;
         }
