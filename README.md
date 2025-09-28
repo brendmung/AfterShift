@@ -9,6 +9,8 @@ An Android application designed for rapid, templated data entry and report gener
 
 The application allows users to define custom report structures via JSON templates, save reports locally, and generate a clean, formatted text output for easy sharing.
 
+You can also create, edit, and experiment with templates directly through the companion web tool at https://after-shift.vercel.app/
+
 ## Features
 
 *   **Customizable Templates:** Import custom JSON templates to change the structure of the report form.
