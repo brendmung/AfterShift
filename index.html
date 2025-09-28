@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AfterShift Template AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <style>
+
+        :root {
+            /* Light Theme Defaults */
+            --bg-color: #e0e0e0; /* Base background */
+            --surface-color: #f0f0f0; /* Slightly lighter surface for cards, chat */
+            --main-color: #4A90E2; /* Accent blue */
+            --main-color-dark: #357bd8;
+            --main-color-light: #7cb4f5;
+            --light-shadow: #ffffff;
+            --dark-shadow: #bebebe;
+            --text-color: #333333;
+            --text-color-light: #ffffff; /* For text on accent backgrounds */
+            --input-bg: #e0e0e0;
+            --code-bg: #222222; /* Dark for code blocks */
+            --code-text: #eeeeee;
+            --error-color: #e53935;
+            --success-color: #43a047;
+            --border-color: #d0d0d0;
+        }
+
+        body.dark-theme {
+            /* Dark Theme Overrides */
+            --bg-color: #1e1e1e;
+            --surface-color: #282828;
+            --main-color: #64B5F6; /* Slightly adjusted blue for dark theme contrast */
+            --main-color-dark: #42A5F5;
+            --main-color-light: #90CAF9;
+            --light-shadow: #0f0f0f; /* Darker "light" shadow */
+            --dark-shadow: #3a3a3a; /* Lighter "dark" shadow */
+            --text-color: #e0e0e0;
+            --text-color-light: #ffffff;
+            --input-bg: #1e1e1e;
+            --code-bg: #000000;
+            --code-text: #eeeeee;
+            --error-color: #ef5350;
+            --success-color: #66bb6a;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            background-color: var(--bg-color);
+            padding: 20px 40px;
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            border-radius: 15px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column; /* Stack children vertically by default */
+            align-items: center; /* Center horizontally */
+            gap: 20px;
+        }
+
+        .header-top-bar { /* NEW: Container for toggle and title */
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping if title is long */
+            gap: 10px; /* Space between title and toggle if wrapped */
+        }
+
+        header h1 {
+            margin: 0;
+            flex-grow: 1; /* Allow H1 to take available space */
+            text-align: center; /* Default center, might be overridden by flex behavior */
+            font-size: 2.2em;
+            color: var(--main-color);
+            text-shadow: 2px 2px 4px var(--dark-shadow);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow);
+            width: 48px; /* Fixed size */
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent toggle from shrinking */
+        }
+
+        .theme-toggle:hover {
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            color: var(--main-color);
+        }
+
+        .theme-toggle:active {
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow);
+            transform: translateY(1px);
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow);
+            white-space: nowrap;
+        }
+
+        nav a:hover {
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            color: var(--main-color);
+        }
+
+        nav a.active {
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            color: var(--main-color);
+            font-weight: bold;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .section {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 8px 8px 16px var(--dark-shadow), -8px -8px 16px var(--light-shadow);
+            display: none;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            color: var(--main-color);
+            text-align: center;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 2px var(--dark-shadow);
+        }
+
+        .section h3 {
+            font-size: 1.4em;
+            color: var(--main-color-dark);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .section h4 {
+            font-size: 1.2em;
+            color: var(--main-color-light);
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        .section ul {
+            list-style: disc;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .section li {
+            margin-bottom: 5px;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            border-radius: 15px;
+            box-shadow: inset 5px 5px 10px var(--dark-shadow), inset -5px -5px 10px var(--light-shadow);
+            padding: 20px;
+            background-color: var(--surface-color);
+            margin-top: 20px;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--dark-shadow) var(--surface-color);
+        }
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-messages::-webkit-scrollbar-track {
+            background: var(--surface-color);
+            border-radius: 10px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--dark-shadow);
+            border-radius: 10px;
+            border: 2px solid var(--surface-color);
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 12px 18px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .message.user {
+            background-color: var(--main-color);
+            color: var(--text-color-light);
+            align-self: flex-end;
+            margin-left: auto;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            border-top-right-radius: 5px;
+        }
+
+        .message.ai {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            align-self: flex-start;
+            margin-right: auto;
+            box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow);
+            border-top-left-radius: 5px;
+        }
+
+        .message.ai pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 10px;
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            background-color: var(--input-bg);
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            font-size: 1em;
+            color: var(--text-color);
+            resize: vertical;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow), 0 0 0 2px var(--main-color);
+        }
+
+        button {
+            background-color: var(--main-color);
+            color: var(--text-color-light);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            white-space: nowrap;
+        }
+
+        button:hover {
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            background-color: var(--main-color-dark);
+        }
+
+        button:active {
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow);
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            cursor: not-allowed;
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+        }
+
+        footer {
+            background-color: var(--bg-color);
+            padding: 20px;
+            text-align: center;
+            box-shadow: -5px -5px 10px var(--light-shadow), 5px 5px 10px var(--dark-shadow);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            margin-top: auto;
+            color: var(--text-color);
+            transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Form elements for Create/Edit/Generate */
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+            text-shadow: 0.5px 0.5px 1px var(--light-shadow);
+            transition: color 0.3s ease;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea,
+        .form-group input[type="file"] {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            font-size: 1em;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input[type="file"] {
+            box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow);
+            background-color: var(--bg-color);
+            cursor: pointer;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow), 0 0 0 2px var(--main-color);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .field-list {
+            margin-top: 20px;
+            border-radius: 15px;
+            box-shadow: inset 3px 3px 7px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            padding: 15px;
+            background-color: var(--surface-color);
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+
+        .field-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            box-shadow: 2px 2px 5px var(--dark-shadow), -2px -2px 5px var(--light-shadow);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .field-item.header {
+            background-color: var(--main-color-light);
+            color: var(--text-color-light);
+            font-weight: bold;
+        }
+
+        .field-item input, .field-item select {
+            flex: 1 1 120px;
+            margin-left: 5px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow);
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+        .field-item input.error {
+            border-color: var(--error-color);
+        }
+
+        .field-item .field-label-text {
+            min-width: 60px;
+            flex-basis: auto;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .field-item.header .field-label-text {
+             color: var(--text-color-light);
+        }
+
+        .field-item .field-toggle-label {
+            min-width: 50px;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+         .field-item.header .field-toggle-label {
+             color: var(--text-color-light);
+        }
+
+        .field-item button {
+            padding: 8px 12px;
+            font-size: 0.8em;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px var(--dark-shadow), -2px -2px 5px var(--light-shadow);
+        }
+
+        .field-item .remove-btn {
+            background-color: var(--error-color);
+        }
+
+        .field-item .add-sub-btn {
+            background-color: var(--success-color);
+        }
+
+        .field-specific-options {
+            width: 100%;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+
+        .field-specific-options > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .field-specific-options .field-toggle-label {
+            flex-basis: 60px;
+        }
+        .field-specific-options input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            box-shadow: inset 1px 1px 3px var(--dark-shadow), inset -1px -1px 3px var(--light-shadow);
+            border-radius: 5px;
+            margin-right: 10px;
+            cursor: pointer;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            -webkit-appearance: none;
+            appearance: none;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .field-specific-options input[type="checkbox"]:checked {
+            background-color: var(--main-color);
+            border-color: var(--main-color-dark);
+        }
+
+        .field-specific-options input[type="checkbox"]:checked::after {
+            content: '✔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-color-light);
+            font-size: 14px;
+        }
+
+        #json-output, #create-json-output, #edit-json-output, #generated-ai-json-output, #example-json-output {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: inset 2px 2px 5px var(--light-shadow), inset -3px -3px 7px var(--dark-shadow);
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Utility classes */
+        .mb-20 { margin-bottom: 20px; }
+        .mt-20 { margin-top: 20px; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .gap-10 { gap: 10px; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .text-center { text-align: center; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                margin: 10px;
+                gap: 15px; /* Reduce gap */
+            }
+            .header-top-bar {
+                margin-bottom: 15px; /* Space between top bar and nav */
+            }
+            header h1 {
+                font-size: 1.8em; /* Smaller title on mobile */
+            }
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px; /* Smaller gap for stacked nav items */
+            }
+            nav a {
+                width: 100%; /* Make nav links full width */
+                text-align: center;
+                box-sizing: border-box; /* Include padding/border in width */
+            }
+            .section {
+                width: 95%;
+                padding: 20px;
+            }
+            .chat-container {
+                height: 400px;
+                padding: 15px;
+            }
+            .chat-input-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .chat-input {
+                width: 100%;
+            }
+            button {
+                width: 100%;
+                padding: 12px 20px;
+            }
+            .field-item {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+            }
+            .field-item input, .field-item select, .field-item button {
+                width: 100%;
+                margin-left: 0;
+            }
+            .field-item .field-label-text, .field-item .field-toggle-label {
+                width: auto;
+                text-align: left;
+            }
+            .field-specific-options > div {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .field-specific-options input[type="checkbox"] {
+                margin-right: 0;
+            }
+            .field-specific-options .field-toggle-label {
+                flex-basis: auto;
+            }
+        }
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5em; /* Even smaller title on very small screens */
+            }
+            .section h2 {
+                font-size: 1.5em;
+            }
+            .section {
+                padding: 15px;
+            }
+            button {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top-bar"> <!-- NEW: Container for toggle and title -->
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                <span class="icon">🌙</span>
+            </button>
+            <h1>AfterShift Template AI ⚡</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" data-section="home" class="active">Home</a></li>
+                <li><a href="#" data-section="create">Create Template</a></li>
+                <li><a href="#" data-section="edit">Edit Template</a></li>
+                <li><a href="#" data-section="chat">Chat with AI</a></li>
+                <li><a href="#" data-section="understand">Understand Templates</a></li>
+                <li><a href="#" data-section="generate">Generate with AI</a></li>
+                <li><a href="#" data-section="about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home-section" class="section active">
+            <h2>Welcome to AfterShift Template AI!</h2>
+            <p class="text-center">Your intelligent companion for creating, editing, understanding, and generating custom report templates for the AfterShift Android app.</p>
+            <p class="text-center mt-20">Use the navigation above to explore our features:</p>
+            <ul style="list-style: none; padding: 0; text-align: center;">
+                <li style="margin-bottom: 10px;"><strong>Create Template:</strong> Build a new template from scratch.</li>
+                <li style="margin-bottom: 10px;"><strong>Edit Template:</strong> Load an existing JSON template and modify it.</li>
+                <li style="margin-bottom: 10px;"><strong>Chat with AI:</strong> Ask questions about templates, app features, or anything else.</li>
+                <li style="margin-bottom: 10px;"><strong>Understand Templates:</strong> Get detailed explanations of the template structure.</li>
+                <li style="margin-bottom: 10px;"><strong>Generate with AI:</strong> Describe your desired template, and let our AI generate the JSON for you!</li>
+            </ul>
+        </section>
+
+        <!-- Create Template Section -->
+        <section id="create-section" class="section">
+            <h2>Create New Template</h2>
+            <div class="form-group">
+                <label for="create-template-id">Template ID (Unique, lowercase_underscore):</label>
+                <input type="text" id="create-template-id" placeholder="e.g., my_daily_report" onblur="validateInternalId(this)">
+            </div>
+            <div class="form-group">
+                <label for="create-template-name">Template Name (Display):</label>
+                <input type="text" id="create-template-name" placeholder="e.g., My Daily Report">
+            </div>
+            <div class="form-group">
+                <label for="create-template-description">Description (Optional):</label>
+                <textarea id="create-template-description" placeholder="A brief description of this template"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="create-preview-format">Preview Format (e.g., 'Total: {total_field}', placeholders are internal IDs):</label>
+                <textarea id="create-preview-format" placeholder="Example: Manager: {shift_manager} | Total Sales: {total_sales}"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="create-report-format">Report Format (for export/SMS, use {field_id} and \n for newlines):</label>
+                <textarea id="create-report-format" placeholder="Example: Date: {date_field}\nTotal Sales: {total_sales}\n{additional_notes}"></textarea>
+            </div>
+
+            <h3>Template Fields:</h3>
+            <div id="create-fields-list" class="field-list flex flex-col gap-10">
+                <!-- Dynamic fields will be added here -->
+            </div>
+            <button class="mt-20" onclick="addTemplateField('create')">Add New Field / Header</button>
+            <div class="form-actions">
+                <button onclick="generateTemplateJson('create')">Generate JSON</button>
+                <button onclick="downloadTemplateJson('create')">Download JSON</button>
+            </div>
+            <pre id="create-json-output" class="mt-20"></pre>
+        </section>
+
+        <!-- Edit Template Section -->
+        <section id="edit-section" class="section">
+            <h2>Edit Existing Template</h2>
+            <div class="form-group">
+                <label for="edit-file-input">Upload Template JSON (e.g., template.json):</label>
+                <input type="file" id="edit-file-input" accept=".json" onchange="loadTemplateForEdit(event)">
+            </div>
+            <div id="edit-template-form" style="display: none;">
+                <div class="form-group">
+                    <label for="edit-template-id">Template ID (Unique, lowercase_underscore):</label>
+                    <input type="text" id="edit-template-id" placeholder="e.g., my_daily_report" onblur="validateInternalId(this)" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="edit-template-name">Template Name (Display):</label>
+                    <input type="text" id="edit-template-name" placeholder="e.g., My Daily Report">
+                </div>
+                <div class="form-group">
+                    <label for="edit-template-description">Description (Optional):</label>
+                    <textarea id="edit-template-description" placeholder="A brief description of this template"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-preview-format">Preview Format (e.g., 'Total: {total_field}', placeholders are internal IDs):</label>
+                    <textarea id="edit-preview-format" placeholder="Example: Manager: {shift_manager} | Total Sales: {total_sales}"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-report-format">Report Format (for export/SMS, use {field_id} and \n for newlines):</label>
+                    <textarea id="edit-report-format" placeholder="Example: Date: {date_field}\nTotal Sales: {total_sales}\n{additional_notes}"></textarea>
+                </div>
+
+                <h3>Template Fields:</h3>
+                <div id="edit-fields-list" class="field-list flex flex-col gap-10">
+                    <!-- Dynamic fields will be added here -->
+                </div>
+                <button class="mt-20" onclick="addTemplateField('edit')">Add New Field / Header</button>
+                <div class="form-actions">
+                    <button onclick="generateTemplateJson('edit')">Update JSON</button>
+                    <button onclick="downloadTemplateJson('edit')">Download Updated JSON</button>
+                </div>
+                <pre id="edit-json-output" class="mt-20"></pre>
+            </div>
+        </section>
+
+        <!-- Chat with AI Section -->
+        <section id="chat-section" class="section">
+            <h2>Chat with AI</h2>
+            <div class="chat-container">
+                <div id="chat-messages" style="display: flex; flex-direction: column;">
+                    <div class="message ai">Hello! I'm an AI assistant specialized in AfterShift report templates. How can I help you today?</div>
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="chat-input" class="chat-input" placeholder="Ask me about templates, features, or anything else!"></textarea>
+                    <button id="send-chat-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Understand Templates Section -->
+        <section id="understand-section" class="section">
+            <h2>Understand AfterShift Templates</h2>
+            <p>AfterShift uses a JSON-based template system to define the fields and layout of your reports. These templates are designed to be flexible, allowing you to create custom forms tailored to your specific needs.</p>
+
+            <h3 class="mt-20">Core Components:</h3>
+            <h4>1. `ReportTemplate` (Overall Structure)</h4>
+            <p>This is the root object of your JSON template. It contains metadata about the template and a list of `TemplateField` objects.</p>
+            <ul>
+                <li><code>templateId</code> (String, required): A unique identifier for your template. Must be lowercase alphanumeric with underscores only (e.g., "daily_shop_report").</li>
+                <li><code>name</code> (String, required): The display name shown in the app (e.g., "Daily Shop Report").</li>
+                <li><code>description</code> (String, optional): A brief explanation of the template's purpose. Omit this key if value is empty.</li>
+                <li><code>fields</code> (Array of `TemplateField` objects, required): The core of your template, defining all input fields and section headers. The order matters for display.</li>
+                <li><code>reportFormat</code> (String, required): Defines how the final report text is formatted for export (e.g., SMS). Use <code>{field_internalId}</code> placeholders. Use <code>\n</code> for newlines.</li>
+                <li><code>previewFormat</code> (String, required): Defines a short preview text for the main screen of the app. Use <code>{field_internalId}</code> placeholders.</li>
+            </ul>
+
+            <h4 class="mt-20">2. `TemplateField` (Individual Elements)</h4>
+            <p>Each item in the <code>fields</code> array is a `TemplateField`. It can represent an input field, a section header, or a field within a section.</p>
+            <ul>
+                <li><code>type</code> (Integer, required): Defines the nature of the field.
+                    <ul>
+                        <li><code>0</code>: Regular input field (`TYPE_FIELD`).</li>
+                        <li><code>1</code>: Section header (`TYPE_HEADER`).</li>
+                        <li><code>2</code>: Field within a section (`TYPE_SECTION_FIELD`).</li>
+                    </ul>
+                </li>
+                <li><code>internalId</code> (String, required): A unique programmatic ID for this field/header across the *entire template*. Used in `reportFormat` and `previewFormat` placeholders, and for calculations. Must be lowercase alphanumeric with underscores only. E.g., "total_sales", "date_field".</li>
+                <li><code>displayLabel</code> (String, required): The human-readable label shown in the app (e.g., "Total Sales").</li>
+                <li><code>defaultValue</code> (String, optional): An initial value for new reports. Can be empty (`""`). Omit this key if value is empty.</li>
+                <li><code>inputType</code> (String, required for `TYPE_FIELD` and `TYPE_SECTION_FIELD`): Controls keyboard and validation hint. MUST be one of:
+                    <ul>
+                        <li><code>"text"</code> (Default): Standard text input.</li>
+                        <li><code>"textMultiLine"</code>: Text input allowing multiple lines.</li>
+                        <li><code>"number"</code>: Numeric input (integers only).</li>
+                        <li><code>"numberDecimal"</code>: Numeric input with decimal points.</li>
+                        <li><code>"numberSigned"</code>: Numeric input allowing positive/negative values and decimals.</li>
+                        <li><code>"phone"</code>: Phone number input.</li>
+                        <li><code>"date"</code>: Date input (currently uses text keyboard).</li>
+                        <li><code>"time"</code>: Time input (currently uses text keyboard).</li>
+                        <li><code>"password"</code>: Password input (characters are hidden).</li>
+                        <li><code>"email"</code>: Email address input.</li>
+                    </ul>
+                </li>
+                <li><code>editable</code> (Boolean, required for `TYPE_FIELD` and `TYPE_SECTION_FIELD`): Set to `true` if the user can type into this field, `false` otherwise (e.g., for calculated fields).</li>
+                <li><code>isCustom</code> (Boolean, required): `true` if this field was added by the user, `false` for built-in fields. (Generally `true` for user-generated templates).</li>
+                <li><code>parentSectionId</code> (String, required for `TYPE_SECTION_FIELD`): The `internalId` of the `TYPE_HEADER` this field belongs to. This header MUST appear *before* the section field in the `fields` array.</li>
+                <li><code>calculationFormula</code> (String, optional for `TYPE_FIELD` and `TYPE_SECTION_FIELD`): A formula for calculated fields. If present, `editable` MUST be `false`. Omit this key if value is empty.
+                    <ul>
+                        <li>Formula format: Uses `internalId` of other fields as placeholders, e.g., <code>"{field1} + {field2} * {field3}"</code>.</li>
+                        <li>Supported operations: `+`, `-`, `*`, `/`.</li>
+                        <li>**Important Limitations:** Calculations are basic, strictly left-to-right, and multiplication/division are done before addition/subtraction in a single pass. For example, "10 + 5 * 2" would be evaluated as (10+5)*2=30, not 10+(5*2)=20. Avoid complex nested parentheses. Outputs are formatted to two decimal places.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3 class="mt-20">Example Template Structure:</h3>
+            <p>A simple JSON example for a daily shift summary:</p>
+            <pre id="example-json-output" class="mt-20">
+                <!-- Filled by JS -->
+            </pre>
+            <button class="mt-20" onclick="downloadExampleJson()">Download Example JSON</button>
+        </section>
+
+        <!-- Generate with AI Section -->
+        <section id="generate-section" class="section">
+            <h2>Generate Template with AI</h2>
+            <p>Describe the report template you need, and our AI will generate the JSON structure for you!</p>
+            <div class="form-group">
+                <label for="generate-ai-description">Describe your desired template in detail (e.g., "I need a daily sales report with fields for date, total sales, expenses, and a calculated net profit. I also need a section for product breakdowns like 'Product A sales' and 'Product B sales'. The date should default to today. Total sales should sum Product A and B. Net profit should be total sales minus expenses. Include a multi-line notes field. Make sure all IDs are valid."):</label>
+                <textarea id="generate-ai-description" class="chat-input" placeholder="Describe your template..."></textarea>
+            </div>
+            <button id="generate-ai-btn" onclick="generateTemplateWithAi()">Generate Template</button>
+            <pre id="generated-ai-json-output" class="mt-20"></pre>
+            <div class="form-actions" style="display: none;" id="ai-generate-actions">
+                <button onclick="downloadTemplateJson('ai-generated')">Download Generated JSON</button>
+                <button onclick="loadGeneratedTemplateForEdit()">Edit in Editor</button>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="section">
+            <h2>About AfterShift Template AI</h2>
+            <p>This website is designed to complement the AfterShift Android application, providing tools to create, manage, and understand the custom report templates used by the app.</p>
+            <p>The AfterShift app allows users to quickly fill out predefined forms (templates) for various daily reports, such as shop reports, and then export them as clean, formatted text (e.g., for SMS or email).</p>
+            <h3 class="mt-20">Features of the AfterShift Android App:</h3>
+            <ul>
+                <li><strong>Customizable Templates:</strong> Define your own report structures using JSON templates.</li>
+                <li><strong>Diverse Field Types:</strong> Support for various input types including text, numbers (decimal, signed), phone, date, time, and multi-line notes.</li>
+                <li><strong>Calculated Fields:</strong> Basic arithmetic calculations can be defined within templates (e.g., sum of fields).</li>
+                <li><strong>Report History:</strong> Save and manage multiple reports within the app.</li>
+                <li><strong>Preview & Export:</strong> Preview your formatted report and export it via SMS or other sharing options.</li>
+                <li><strong>Theme Support:</strong> Light, Dark, and System Default themes, managed via app preferences.</li>
+                <li><strong>Template Management:</strong> Import new templates, set default templates for new reports, and delete custom templates.</li>
+            </ul>
+            <p class="mt-20">This web tool helps you craft those JSON templates with an AI assistant that understands the app's specific template format and limitations.</p>
+            <p class="mt-20">Developed by Brendmung. Find the Android project on <a href="https://github.com/brendmung/AfterShift" target="_blank" style="color: var(--main-color); text-decoration: underline;">GitHub</a>.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 AfterShift. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const API_ENDPOINT = 'https://grey-api.vercel.app/api/chat';
+        const NAV_LINKS = document.querySelectorAll('nav a');
+        const SECTIONS = document.querySelectorAll('.section');
+        const CHAT_MESSAGES_DIV = document.getElementById('chat-messages');
+        const CHAT_INPUT = document.getElementById('chat-input');
+        const SEND_CHAT_BTN = document.getElementById('send-chat-btn');
+        const GENERATE_AI_DESC = document.getElementById('generate-ai-description');
+        const GENERATE_AI_BTN = document.getElementById('generate-ai-btn');
+        const GENERATED_AI_JSON_OUTPUT = document.getElementById('generated-ai-json-output');
+        const AI_GENERATE_ACTIONS = document.getElementById('ai-generate-actions');
+        const THEME_TOGGLE = document.getElementById('theme-toggle');
+        const THEME_TOGGLE_ICON = THEME_TOGGLE.querySelector('.icon');
+
+        let chatHistory = [{ role: 'system', content: getAISystemMessage() }];
+
+        let fieldIdCounter = 0;
+        function getUniqueFieldId(prefix = 'temp_field_') {
+            return prefix + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        const SUPPORTED_INPUT_TYPES = [
+            "text", "textMultiLine", "number", "numberDecimal", "numberSigned",
+            "phone", "date", "time", "password", "email"
+        ];
+        const TEMPLATE_FIELD_TYPES = {
+            FIELD: 0,
+            HEADER: 1,
+            SECTION_FIELD: 2
+        };
+
+        // --- Theme Management ---
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-theme', theme === 'dark');
+            THEME_TOGGLE_ICON.textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        THEME_TOGGLE.addEventListener('click', toggleTheme);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+        });
+
+        // --- Core AI Context / System Message ---
+        function getAISystemMessage() {
+            return `You are an AI assistant specialized in generating, explaining, and validating JSON templates for the AfterShift Android report application.
+The application uses a specific JSON structure for its report templates. You must adhere strictly to this structure.
+
+Here's the detailed template structure:
+
+1.  **ReportTemplate (Overall Structure - root JSON object):**
+    *   \`templateId\` (String, required): A unique lowercase_underscore identifier (e.g., "daily_sales_report"). Must be alphanumeric with underscores only.
+    *   \`name\` (String, required): Display name (e.g., "Daily Sales Report").
+    *   \`description\` (String, optional): Brief purpose explanation. Omit if empty.
+    *   \`fields\` (Array of TemplateField objects, required): The list of all fields and headers. The order in this array determines display order in the app.
+    *   \`reportFormat\` (String, required): Defines the final formatted text for export (e.g., SMS). Uses \`{internalId}\` placeholders. Use \`\\n\` for newlines.
+    *   \`previewFormat\` (String, required): Short preview text for the app's main screen. Uses \`{internalId}\` placeholders.
+
+2.  **TemplateField (Individual Elements - objects within the 'fields' array):**
+    *   \`type\` (Integer, required):
+        *   \`0\` (TYPE_FIELD): Regular input field.
+        *   \`1\` (TYPE_HEADER): Section header.
+        *   \`2\` (TYPE_SECTION_FIELD): Field nested under a header.
+    *   \`internalId\` (String, required): Unique lowercase_underscore ID for this element across the *entire template*. Must be alphanumeric with underscores only (e.g., "total_sales"). Used in formats and calculations.
+    *   \`displayLabel\` (String, required): Human-readable label shown in the app.
+    *   \`defaultValue\` (String, optional): Initial value for new reports. Can be \`""\`. Omit this key if value is empty.
+    *   \`inputType\` (String, required for TYPE_FIELD and TYPE_SECTION_FIELD): Controls keyboard and validation hint. MUST be one of:
+        *   \`"text"\` (Default, for general text, capitalized sentences)
+        *   \`"textMultiLine"\` (For longer notes, allows newlines)
+        *   \`"number"\` (integers only)
+        *   \`"numberDecimal"\` (decimals, e.g., 12.34)
+        *   \`"numberSigned"\` (positive/negative integers/decimals)
+        *   \`"phone"\`
+        *   \`"date"\` (currently uses text keyboard, hint for future date picker)
+        *   \`"time"\` (currently uses text keyboard, hint for future time picker)
+        *   \`"password"\` (characters hidden)
+        *   \`"email"\`
+        *   **DO NOT use any other inputType strings.**
+    *   \`editable\` (Boolean, required for TYPE_FIELD and TYPE_SECTION_FIELD): \`true\` if user can type, \`false\` if read-only (e.g., for calculated fields).
+    *   \`isCustom\` (Boolean, required): \`true\` for user-defined fields, \`false\` for system-defined. (Always \`true\` for templates generated here unless specifically overridden).
+    *   \`parentSectionId\` (String, required for TYPE_SECTION_FIELD): The \`internalId\` of the TYPE_HEADER this field belongs to. This header MUST be defined in the \`fields\` array and appear *before* this section field.
+    *   \`calculationFormula\` (String, optional for TYPE_FIELD and TYPE_SECTION_FIELD): A formula using \`{internalId}\` placeholders. If present, \`editable\` MUST be \`false\`. Omit this key if empty.
+        *   Supported operators: \`+\`, \`-\`, \`*\`, \`/\`.
+        *   **Evaluation is BASIC, strictly left-to-right, with multiplication/division done before addition/subtraction in a single pass (e.g., "10 + 5 * 2" is evaluated as (10+5)*2=30). Avoid complex nested parentheses or operator precedence assumptions beyond this simple rule.**
+        *   Output in the app is formatted to two decimal places (e.g., "%.2f").
+        *   Example: \`"{sales_field} + {tax_field}"\` or \`"{subtotal} * 0.15"\`.
+
+**Constraints and Important Notes for Template Generation:**
+*   All \`internalId\`s must be unique across the *entire template*.
+*   Fields under a header (TYPE_SECTION_FIELD) must have a valid \`parentSectionId\` pointing to a TYPE_HEADER that appears *before* them in the \`fields\` array.
+*   The \`fields\` array should contain all elements in their desired display order. Headers group subsequent section fields.
+*   Generated JSON MUST be valid and strictly conform to this schema.
+*   If generating a formula, ensure the referenced \`internalId\`s are defined as fields in the template.
+*   If a field has a \`calculationFormula\`, its \`editable\` property MUST be \`false\`.
+*   Explain any limitations or choices made in the generated template in your conversational response, but when asked for JSON output, provide *only* the JSON code block.
+*   Always use \`"textMultiLine"\` for fields intended for longer, free-form notes or descriptions.
+*   Omit optional fields from the JSON object if they are empty (e.g., \`"description": "", "defaultValue": "", "calculationFormula": ""\`).
+
+I am ready to help you create, edit, chat about, understand, and generate templates. How can I assist you with your AfterShift templates?`;
+        }
+
+        // --- Navigation Logic ---
+        NAV_LINKS.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetSectionId = e.target.dataset.section + '-section';
+
+                NAV_LINKS.forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+
+                SECTIONS.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetSectionId).classList.add('active');
+
+                if (targetSectionId === 'understand-section') {
+                    displayExampleJson();
+                } else if (targetSectionId === 'chat-section') {
+                     CHAT_INPUT.focus();
+                }
+            });
+        });
+
+        // --- Chat with AI Logic ---
+        async function sendMessage() {
+            const userMessage = CHAT_INPUT.value.trim();
+            if (!userMessage) return;
+
+            displayMessage(userMessage, 'user');
+            CHAT_INPUT.value = '';
+            SEND_CHAT_BTN.disabled = true;
+            SEND_CHAT_BTN.textContent = 'Thinking...';
+
+            chatHistory.push({ role: 'user', content: userMessage });
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'gpt-4o',
+                        messages: chatHistory
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const aiResponse = data.response;
+                displayMessage(aiResponse, 'ai');
+                chatHistory.push({ role: 'assistant', content: aiResponse });
+            } catch (error) {
+                console.error('Error calling AI API:', error);
+                displayMessage('Error: Could not connect to AI or API returned an error. Please check console.', 'ai');
+            } finally {
+                SEND_CHAT_BTN.disabled = false;
+                SEND_CHAT_BTN.textContent = 'Send';
+                CHAT_MESSAGES_DIV.scrollTop = CHAT_MESSAGES_DIV.scrollHeight;
+            }
+        }
+
+        CHAT_INPUT.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function displayMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            const formattedText = text.replace(/```json\n([\s\S]*?)\n```/g, '<pre><code class="language-json">$1</code></pre>');
+            msgDiv.innerHTML = formattedText;
+            CHAT_MESSAGES_DIV.appendChild(msgDiv);
+            CHAT_MESSAGES_DIV.scrollTop = CHAT_MESSAGES_DIV.scrollHeight;
+        }
+
+        // --- Template Editor Logic (Create & Edit) ---
+        function addTemplateField(mode, fieldData = null) {
+            const fieldList = document.getElementById(`${mode}-fields-list`);
+            const isHeader = fieldData ? fieldData.type === TEMPLATE_FIELD_TYPES.HEADER : false;
+            const isSectionField = fieldData ? fieldData.type === TEMPLATE_FIELD_TYPES.SECTION_FIELD : false;
+            const hasFormula = fieldData && fieldData.calculationFormula && fieldData.calculationFormula.trim() !== '';
+
+            const fieldDiv = document.createElement('div');
+            fieldDiv.classList.add('field-item', 'flex', 'flex-wrap', 'items-center', 'gap-10', 'mb-10');
+            fieldDiv.dataset.id = fieldData ? fieldData.internalId : getUniqueFieldId();
+
+            if (isHeader) fieldDiv.classList.add('header');
+
+            function getHeaderOptionsHtml(currentParentId = '') {
+                let options = '<option value="">-- Select Header --</option>';
+                document.querySelectorAll(`#${mode}-fields-list .${mode}-field-type[value="${TEMPLATE_FIELD_TYPES.HEADER}"]`).forEach(headerTypeInput => {
+                    const headerFieldItem = headerTypeInput.closest('.field-item');
+                    const headerInternalId = headerFieldItem.querySelector('.field-internal-id').value;
+                    const headerDisplayName = headerFieldItem.querySelector('.field-display-label').value;
+                    if (headerInternalId && headerDisplayName) {
+                        options += `<option value="${headerInternalId}" ${currentParentId === headerInternalId ? 'selected' : ''}>${headerDisplayName} (${headerInternalId})</option>`;
+                    }
+                });
+                return options;
+            }
+
+            fieldDiv.innerHTML = `
+                <span class="field-label-text">Type:</span>
+                <select class="${mode}-field-type" onchange="toggleFieldOptions(this, '${mode}')" style="flex: 0.8;">
+                    <option value="${TEMPLATE_FIELD_TYPES.FIELD}" ${fieldData && fieldData.type === TEMPLATE_FIELD_TYPES.FIELD ? 'selected' : ''}>Field</option>
+                    <option value="${TEMPLATE_FIELD_TYPES.HEADER}" ${fieldData && fieldData.type === TEMPLATE_FIELD_TYPES.HEADER ? 'selected' : ''}>Header</option>
+                    <option value="${TEMPLATE_FIELD_TYPES.SECTION_FIELD}" ${fieldData && fieldData.type === TEMPLATE_FIELD_TYPES.SECTION_FIELD ? 'selected' : ''}>Section Field</option>
+                </select>
+                <button type="button" class="remove-btn" onclick="removeTemplateField(this)">Remove</button>
+                <div class="field-details flex flex-col gap-10" style="width: 100%; margin-top: 10px;">
+                    <div class="flex items-center gap-10">
+                        <span class="field-label-text">ID:</span>
+                        <input type="text" class="field-internal-id" value="${fieldData ? fieldData.internalId : ''}" placeholder="internal_id" onblur="validateInternalId(this)" style="flex: 1;">
+                        <span class="field-label-text">Label:</span>
+                        <input type="text" class="field-display-label" value="${fieldData ? fieldData.displayLabel : ''}" placeholder="Display Label" style="flex: 1;">
+                    </div>
+                    <div class="field-specific-options flex flex-col gap-10" ${isHeader ? 'style="display:none;"' : ''}>
+                        <div class="flex items-center gap-10">
+                            <span class="field-label-text">Default:</span>
+                            <input type="text" class="field-default-value" value="${fieldData && fieldData.defaultValue !== undefined ? fieldData.defaultValue : ''}" placeholder="Optional default value" style="flex: 1;">
+                            <span class="field-label-text">Input Type:</span>
+                            <select class="field-input-type" style="flex: 1;">
+                                ${SUPPORTED_INPUT_TYPES.map(t => `<option value="${t}" ${fieldData && fieldData.inputType === t ? 'selected' : ''}>${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-10">
+                            <span class="field-toggle-label">Editable:</span>
+                            <input type="checkbox" class="field-editable" ${fieldData === null || fieldData.editable ? 'checked' : ''} ${hasFormula ? 'disabled' : ''}>
+                            <span class="field-toggle-label">Custom:</span>
+                            <input type="checkbox" class="field-is-custom" ${fieldData === null || fieldData.isCustom ? 'checked' : ''}>
+                        </div>
+                        <div class="flex items-center gap-10 field-parent-section" ${!isSectionField ? 'style="display:none;"' : ''}>
+                            <span class="field-label-text">Parent:</span>
+                            <select class="field-parent-section-id" style="flex: 1;">
+                                ${getHeaderOptionsHtml(fieldData ? fieldData.parentSectionId : '')}
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-10 field-calc-formula">
+                            <span class="field-label-text">Formula:</span>
+                            <input type="text" class="field-calc-formula-input" value="${fieldData && fieldData.calculationFormula !== undefined ? fieldData.calculationFormula : ''}" placeholder="{field1} + {field2}" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+            `;
+            fieldList.appendChild(fieldDiv);
+
+            toggleFieldOptions(fieldDiv.querySelector(`.${mode}-field-type`), mode);
+
+            if (isHeader || fieldData === null) {
+                updateAllParentSectionDropdowns(mode);
+            }
+        }
+
+        function toggleFieldOptions(selectElement, mode) {
+            const fieldItem = selectElement.closest('.field-item');
+            const fieldDetails = fieldItem.querySelector('.field-specific-options');
+            const parentSectionGroup = fieldItem.querySelector('.field-parent-section');
+            const type = parseInt(selectElement.value);
+
+            if (type === TEMPLATE_FIELD_TYPES.HEADER) {
+                fieldDetails.style.display = 'none';
+                fieldItem.classList.add('header');
+                let addSectionBtn = fieldItem.querySelector('.add-sub-btn');
+                if (addSectionBtn) addSectionBtn.remove();
+
+                addSectionBtn = document.createElement('button');
+                addSectionBtn.classList.add('add-sub-btn');
+                addSectionBtn.textContent = 'Add Section Field';
+                addSectionBtn.onclick = () => addTemplateField(mode, { type: TEMPLATE_FIELD_TYPES.SECTION_FIELD, parentSectionId: fieldItem.querySelector('.field-internal-id').value });
+                fieldItem.appendChild(addSectionBtn);
+            } else {
+                fieldDetails.style.display = 'flex';
+                fieldItem.classList.remove('header');
+                const addSectionBtn = fieldItem.querySelector('.add-sub-btn');
+                if (addSectionBtn) addSectionBtn.remove();
+            }
+
+            if (type === TEMPLATE_FIELD_TYPES.SECTION_FIELD) {
+                parentSectionGroup.style.display = 'flex';
+                let headerOptions = '<option value="">-- Select Header --</option>';
+                document.querySelectorAll(`#${mode}-fields-list .${mode}-field-type[value="${TEMPLATE_FIELD_TYPES.HEADER}"]`).forEach(headerTypeInput => {
+                    const headerFieldItem = headerTypeInput.closest('.field-item');
+                    const headerInternalId = headerFieldItem.querySelector('.field-internal-id').value;
+                    const headerDisplayName = headerFieldItem.querySelector('.field-display-label').value;
+                    if (headerInternalId && headerDisplayName) {
+                        headerOptions += `<option value="${headerInternalId}">${headerDisplayName} (${headerInternalId})</option>`;
+                    }
+                });
+                parentSectionGroup.querySelector('.field-parent-section-id').innerHTML = headerOptions;
+
+                if (fieldItem.dataset.fieldData) {
+                    const loadedFieldData = JSON.parse(fieldItem.dataset.fieldData);
+                    parentSectionGroup.querySelector('.field-parent-section-id').value = loadedFieldData.parentSectionId || '';
+                }
+
+            } else {
+                parentSectionGroup.style.display = 'none';
+            }
+
+            const formulaInput = fieldItem.querySelector('.field-calc-formula-input');
+            const editableCheckbox = fieldItem.querySelector('.field-editable');
+            if (formulaInput && editableCheckbox) {
+                formulaInput.removeEventListener('input', updateEditableStateForFormula);
+                formulaInput.addEventListener('input', updateEditableStateForFormula);
+                updateEditableStateForFormula.call(formulaInput);
+            }
+        }
+
+        function updateEditableStateForFormula() {
+            const formulaInput = this;
+            const fieldItem = formulaInput.closest('.field-item');
+            const editableCheckbox = fieldItem.querySelector('.field-editable');
+            const hasFormula = formulaInput.value.trim() !== '';
+
+            editableCheckbox.checked = !hasFormula;
+            editableCheckbox.disabled = hasFormula;
+        }
+
+        function updateAllParentSectionDropdowns(mode) {
+            document.querySelectorAll(`#${mode}-fields-list .field-parent-section-id`).forEach(dropdown => {
+                const currentParentId = dropdown.value;
+                let headerOptions = '<option value="">-- Select Header --</option>';
+                document.querySelectorAll(`#${mode}-fields-list .${mode}-field-type[value="${TEMPLATE_FIELD_TYPES.HEADER}"]`).forEach(headerTypeInput => {
+                    const headerFieldItem = headerTypeInput.closest('.field-item');
+                    const headerInternalId = headerFieldItem.querySelector('.field-internal-id').value;
+                    const headerDisplayName = headerFieldItem.querySelector('.field-display-label').value;
+                    if (headerInternalId && headerDisplayName) {
+                        headerOptions += `<option value="${headerInternalId}">${headerDisplayName} (${headerInternalId})</option>`;
+                    }
+                });
+                dropdown.innerHTML = headerOptions;
+                dropdown.value = currentParentId;
+            });
+        }
+
+        function removeTemplateField(button) {
+            button.closest('.field-item').remove();
+            const mode = button.closest('.field-list').id.includes('create') ? 'create' : 'edit';
+            updateAllParentSectionDropdowns(mode);
+        }
+
+        function validateInternalId(input) {
+            const value = input.value.trim();
+            const mode = input.closest('.section').id.includes('create') ? 'create' : 'edit';
+
+            if (!/^[a-z0-9_]+$/.test(value)) {
+                input.classList.add('error');
+                input.title = 'Internal ID must be lowercase alphanumeric with underscores only.';
+                return false;
+            } else {
+                let isUnique = true;
+                document.querySelectorAll(`#${mode}-fields-list .field-internal-id, #${mode}-template-id`).forEach(otherInput => {
+                    if (otherInput !== input && otherInput.value.trim() === value) {
+                        isUnique = false;
+                    }
+                });
+                if (!isUnique) {
+                    input.classList.add('error');
+                    input.title = 'Duplicate Internal ID found. All IDs must be unique.';
+                    return false;
+                }
+                input.classList.remove('error');
+                input.title = '';
+                return true;
+            }
+        }
+
+        function getTemplateData(mode) {
+            const templateIdInput = document.getElementById(`${mode}-template-id`);
+            const templateId = templateIdInput.value.trim();
+            const templateName = document.getElementById(`${mode}-template-name`).value.trim();
+            const templateDescription = document.getElementById(`${mode}-template-description`).value.trim();
+            const previewFormat = document.getElementById(`${mode}-preview-format`).value.trim();
+            const reportFormat = document.getElementById(`${mode}-report-format`).value.trim();
+
+            if (!templateId || !templateName || !previewFormat || !reportFormat) {
+                alert('Please fill in all main template details (ID, Name, Preview Format, Report Format).');
+                return null;
+            }
+            if (!validateInternalId(templateIdInput)) {
+                alert('Please correct the Template ID format.');
+                return null;
+            }
+
+            const fields = [];
+            const internalIds = new Set();
+            let isValid = true;
+
+            const fieldItems = document.querySelectorAll(`#${mode}-fields-list .field-item`);
+            fieldItems.forEach(fieldItem => {
+                const type = parseInt(fieldItem.querySelector(`.${mode}-field-type`).value);
+                const internalIdInput = fieldItem.querySelector('.field-internal-id');
+                const internalId = internalIdInput.value.trim();
+                const displayLabel = fieldItem.querySelector('.field-display-label').value.trim();
+
+                if (!internalId || !displayLabel) {
+                    isValid = false;
+                    alert('All fields must have an Internal ID and Display Label.');
+                    internalIdInput.classList.add('error');
+                    return;
+                }
+                if (!validateInternalId(internalIdInput)) {
+                    isValid = false;
+                    return;
+                }
+                if (internalIds.has(internalId)) {
+                    isValid = false;
+                    alert(`Duplicate Internal ID found: "${internalId}". All IDs must be unique.`);
+                    internalIdInput.classList.add('error');
+                    return;
+                }
+                internalIds.add(internalId);
+
+                const field = {
+                    type: type,
+                    internalId: internalId,
+                    displayLabel: displayLabel,
+                    isCustom: fieldItem.querySelector('.field-is-custom') ? fieldItem.querySelector('.field-is-custom').checked : true
+                };
+
+                if (type !== TEMPLATE_FIELD_TYPES.HEADER) {
+                    field.defaultValue = fieldItem.querySelector('.field-default-value').value;
+                    field.inputType = fieldItem.querySelector('.field-input-type').value;
+                    field.editable = fieldItem.querySelector('.field-editable').checked;
+                    field.calculationFormula = fieldItem.querySelector('.field-calc-formula-input').value.trim();
+
+                    if (field.calculationFormula) {
+                        field.editable = false;
+                    }
+
+                    if (type === TEMPLATE_FIELD_TYPES.SECTION_FIELD) {
+                        field.parentSectionId = fieldItem.querySelector('.field-parent-section-id').value;
+                        if (!field.parentSectionId) {
+                            isValid = false;
+                            alert(`Section field "${displayLabel}" must have a parent header selected.`);
+                            fieldItem.querySelector('.field-parent-section-id').classList.add('error');
+                            return;
+                        }
+                    }
+                } else {
+                    delete field.defaultValue;
+                    delete field.inputType;
+                    delete field.editable;
+                    delete field.calculationFormula;
+                    delete field.parentSectionId;
+                }
+
+                if (field.description !== undefined && field.description.trim() === '') delete field.description;
+                if (field.defaultValue !== undefined && field.defaultValue === '') delete field.defaultValue;
+                if (field.calculationFormula !== undefined && field.calculationFormula === '') delete field.calculationFormula;
+
+                fields.push(field);
+            });
+
+            if (!isValid) return null;
+
+            const template = {
+                templateId: templateId,
+                name: templateName,
+                fields: fields,
+                reportFormat: reportFormat,
+                previewFormat: previewFormat
+            };
+            if (templateDescription) {
+                template.description = templateDescription;
+            }
+
+            return template;
+        }
+
+        function generateTemplateJson(mode) {
+            const templateData = getTemplateData(mode);
+            const outputElement = document.getElementById(`${mode}-json-output`);
+            if (templateData) {
+                outputElement.textContent = JSON.stringify(templateData, null, 2);
+            } else {
+                outputElement.textContent = 'Invalid template data. Please fix errors shown above.';
+            }
+        }
+
+        function downloadTemplateJson(mode) {
+            let templateData;
+            let outputElement;
+            if (mode === 'ai-generated') {
+                outputElement = GENERATED_AI_JSON_OUTPUT;
+                try {
+                    templateData = JSON.parse(GENERATED_AI_JSON_OUTPUT.textContent);
+                } catch (e) {
+                    alert('No valid JSON generated by AI to download.');
+                    return;
+                }
+            } else {
+                templateData = getTemplateData(mode);
+                outputElement = document.getElementById(`${mode}-json-output`);
+            }
+
+            if (templateData) {
+                const jsonString = JSON.stringify(templateData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${templateData.templateId || 'template'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                outputElement.textContent = 'Invalid template data. Cannot download.';
+            }
+        }
+
+        function loadTemplateForEdit(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const template = JSON.parse(e.target.result);
+                    if (!template.templateId || !template.name || !Array.isArray(template.fields) || !template.reportFormat || !template.previewFormat) {
+                        throw new Error("Missing essential template properties (templateId, name, fields, reportFormat, previewFormat).");
+                    }
+                    populateEditForm(template);
+                    document.getElementById('edit-template-form').style.display = 'block';
+                    document.getElementById('edit-json-output').textContent = JSON.stringify(template, null, 2);
+                } catch (error) {
+                    alert('Invalid JSON file or incorrect template structure: ' + error.message);
+                    console.error('Error parsing JSON for edit:', error);
+                    document.getElementById('edit-template-form').style.display = 'none';
+                    document.getElementById('edit-json-output').textContent = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function populateEditForm(template) {
+            document.getElementById('edit-template-id').value = template.templateId || '';
+            document.getElementById('edit-template-name').value = template.name || '';
+            document.getElementById('edit-template-description').value = template.description || '';
+            document.getElementById('edit-preview-format').value = template.previewFormat || '';
+            document.getElementById('edit-report-format').value = template.reportFormat || '';
+
+            const fieldList = document.getElementById('edit-fields-list');
+            fieldList.innerHTML = '';
+
+            template.fields.forEach(field => addTemplateField('edit', field));
+            updateAllParentSectionDropdowns('edit');
+        }
+
+        function loadGeneratedTemplateForEdit() {
+            const generatedJson = GENERATED_AI_JSON_OUTPUT.textContent;
+            if (!generatedJson) {
+                alert('No generated JSON to load.');
+                return;
+            }
+            try {
+                const template = JSON.parse(generatedJson);
+                NAV_LINKS.forEach(l => l.classList.remove('active'));
+                document.querySelector('[data-section="edit"]').classList.add('active');
+                SECTIONS.forEach(section => section.classList.remove('active'));
+                document.getElementById('edit-section').classList.add('active');
+
+                populateEditForm(template);
+                document.getElementById('edit-template-form').style.display = 'block';
+                document.getElementById('edit-json-output').textContent = JSON.stringify(template, null, 2);
+            } catch (error) {
+                alert('Error parsing generated JSON for editing: ' + error.message);
+                console.error('Error parsing generated JSON:', error);
+            }
+        }
+
+        // --- Understand Templates Section ---
+        function displayExampleJson() {
+            const exampleTemplate = {
+                templateId: "sample_daily_shift",
+                name: "Sample Daily Shift Report",
+                description: "A basic template for tracking daily shift activities and sales.",
+                fields: [
+                    {
+                        type: TEMPLATE_FIELD_TYPES.FIELD,
+                        internalId: "report_date",
+                        displayLabel: "Date of Report",
+                        defaultValue: "",
+                        inputType: "date",
+                        editable: true,
+                        isCustom: true
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.FIELD,
+                        internalId: "shift_manager",
+                        displayLabel: "Shift Manager",
+                        defaultValue: "",
+                        inputType: "text",
+                        editable: true,
+                        isCustom: true
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.HEADER,
+                        internalId: "sales_summary_header",
+                        displayLabel: "Sales Summary",
+                        isCustom: true
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.SECTION_FIELD,
+                        internalId: "cash_sales",
+                        displayLabel: "Cash Sales",
+                        defaultValue: "0.00",
+                        inputType: "numberDecimal",
+                        editable: true,
+                        isCustom: true,
+                        parentSectionId: "sales_summary_header"
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.SECTION_FIELD,
+                        internalId: "card_sales",
+                        displayLabel: "Card Sales",
+                        defaultValue: "0.00",
+                        inputType: "numberDecimal",
+                        editable: true,
+                        isCustom: true,
+                        parentSectionId: "sales_summary_header"
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.SECTION_FIELD,
+                        internalId: "total_sales",
+                        displayLabel: "Total Sales",
+                        defaultValue: "0.00",
+                        inputType: "numberDecimal",
+                        editable: false,
+                        isCustom: true,
+                        parentSectionId: "sales_summary_header",
+                        calculationFormula: "{cash_sales} + {card_sales}"
+                    },
+                    {
+                        type: TEMPLATE_FIELD_TYPES.FIELD,
+                        internalId: "additional_notes",
+                        displayLabel: "Additional Notes",
+                        defaultValue: "",
+                        inputType: "textMultiLine",
+                        editable: true,
+                        isCustom: true
+                    }
+                ],
+                reportFormat: "Daily Shift Report - {report_date}\\nManager: {shift_manager}\\n\\n--- Sales ---\\nCash: {cash_sales}\\nCard: {card_sales}\\nTotal: {total_sales}\\n\\n--- Notes ---\\n{additional_notes}",
+                previewFormat: "Manager: {shift_manager} | Total Sales: {total_sales}"
+            };
+            document.getElementById('example-json-output').textContent = JSON.stringify(exampleTemplate, null, 2);
+        }
+
+        function downloadExampleJson() {
+            const exampleJson = document.getElementById('example-json-output').textContent;
+            if (exampleJson) {
+                const templateData = JSON.parse(exampleJson);
+                const jsonString = JSON.stringify(templateData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${templateData.templateId || 'example_template'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // --- Generate with AI Logic ---
+        async function generateTemplateWithAi() {
+            const description = GENERATE_AI_DESC.value.trim();
+            if (!description) {
+                alert('Please describe the template you want to generate.');
+                return;
+            }
+
+            GENERATED_AI_JSON_OUTPUT.textContent = 'Generating...';
+            GENERATE_AI_BTN.disabled = true;
+            GENERATE_AI_BTN.textContent = 'Generating...';
+            AI_GENERATE_ACTIONS.style.display = 'none';
+
+            const messages = [
+                { role: 'system', content: getAISystemMessage() },
+                { role: 'user', content: `Please generate a JSON report template based on the following description. ONLY output the JSON code block. No additional conversational text, just the JSON. Ensure all fields (templateId, internalId) are lowercase_underscore and unique, inputTypes are supported, and calculationFormula adheres to the specified basic left-to-right evaluation. Omit empty optional fields like description, defaultValue, and calculationFormula.
+
+Description: ${description}` }
+            ];
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'gpt-4o',
+                        messages: messages
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                let aiResponse = data.response;
+
+                const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/);
+                if (jsonMatch && jsonMatch[1]) {
+                    aiResponse = jsonMatch[1];
+                }
+
+                GENERATED_AI_JSON_OUTPUT.textContent = aiResponse;
+
+                try {
+                    const generatedTemplate = JSON.parse(aiResponse);
+                    if (!generatedTemplate.templateId || !generatedTemplate.name || !Array.isArray(generatedTemplate.fields) || !generatedTemplate.reportFormat || !generatedTemplate.previewFormat) {
+                         alert('AI generated an incomplete or invalid template structure. Please refine your prompt or edit manually.');
+                         GENERATED_AI_JSON_OUTPUT.textContent += '\n\nError: Generated JSON structure is incomplete or invalid. Please check console for details.';
+                         console.error('Generated template validation failed:', generatedTemplate);
+                         AI_GENERATE_ACTIONS.style.display = 'none';
+                    } else {
+                         AI_GENERATE_ACTIONS.style.display = 'flex';
+                         alert('Template generated successfully! Review the JSON below.');
+                    }
+                } catch (jsonError) {
+                    alert('AI generated invalid JSON. Please refine your prompt or edit manually. Error: ' + jsonError.message);
+                    GENERATED_AI_JSON_OUTPUT.textContent += '\n\nError: Generated JSON is malformed. ' + jsonError.message;
+                    console.error('Error parsing AI generated JSON:', jsonError);
+                    AI_GENERATE_ACTIONS.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error generating template:', error);
+                GENERATED_AI_JSON_OUTPUT.textContent = 'Error: Could not generate template. Please check your network connection or try again later.';
+                AI_GENERATE_ACTIONS.style.display = 'none';
+            } finally {
+                GENERATE_AI_BTN.disabled = false;
+                GENERATE_AI_BTN.textContent = 'Generate Template';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('nav a[data-section="home"]').click();
+            displayExampleJson();
+        });
+
+    </script>
+</body>
+</html>
