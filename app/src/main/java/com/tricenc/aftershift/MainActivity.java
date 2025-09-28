@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements SavedReportsAdapt
         });
 
         for (ReportTemplate t : templates) {
-            templateDisplayNames.add(t.getName() + (t.getTemplateId().equals(templateManager.getCurrentTemplateId()) ? " (Current Default)" : ""));
+            templateDisplayNames.add(t.getName() + (t.getTemplateId().equals(templateManager.getCurrentTemplateId()) ? " (✅)" : ""));
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -373,12 +373,37 @@ public class MainActivity extends AppCompatActivity implements SavedReportsAdapt
         builder.show();
     }
 
-    // NEW: About Dialog
+    // UPDATED: About Dialog to include GitHub link, email, and use Neutral/Negative/Positive buttons
     private void showAboutDialog() {
+        // Use "1.0" as the version number, matching the existing code's placeholder logic
+        String version = "v1.0"; 
+        String appName = getString(R.string.app_name);
+        
+        // Construct the message, appending the new information
+        String message = getString(R.string.about_text);
+
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.app_name_main_title) + " " + "1.0") // Assuming BuildConfig has VERSION_NAME
-                .setMessage(getString(R.string.about_text))
-                .setPositiveButton("OK", null)
+                .setTitle(appName + " " + version)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Dismiss the dialog
+                })
+                .setNeutralButton("GitHub", (dialog, which) -> {
+                    // Action for Neutral button: Open GitHub URL
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/brendmung/AfterShift"));
+                    startActivity(browserIntent);
+                })
+                .setNegativeButton("Email", (dialog, which) -> {
+                    // Action for Negative button: Send email
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    emailIntent.setData(Uri.parse("mailto:brendmung@gmail.com"));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, appName + " App Inquiry");
+                    try {
+                        startActivity(Intent.createChooser(emailIntent, "Send email via..."));
+                    } catch (android.content.ActivityNotFoundException ex) {
+                        Toast.makeText(this, "No email clients installed.", Toast.LENGTH_SHORT).show();
+                    }
+                })
                 .show();
     }
 

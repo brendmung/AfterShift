@@ -64,9 +64,13 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
     private ReportTemplate currentTemplate;
     private long currentReportId = -1;
     private String userDefinedTitle = null; // NEW: Field to store user-defined title
+    private String originalReportJson = null; // NEW: Field to store the report JSON when loaded or last saved
+    private boolean isDataModified = false; // NEW: Flag for quick check if data has changed
 
     private final Gson gson = new Gson();
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler debounceHandler = new Handler(Looper.getMainLooper()); // NEW: Handler for debouncing button state updates
+    private final Runnable updateButtonRunnable = this::updateSaveButtonState; // NEW: Runnable for button state update
 
     private Map<String, ReportItem> reportItemMap; // NEW: Map to quickly access ReportItems by internalId
     private Map<String, List<String>> fieldDependencies; // NEW: Map: fieldId -> list of calculated fieldIds that depend on it
@@ -294,10 +298,13 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
             setupFieldsFromTemplate(currentTemplate);
             // Initialize userDefinedTitle for new reports with a default suggestion
             userDefinedTitle = currentTemplate.getName() + " - " + new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(new Date());
+            // For a new report, originalReportJson is null until the first save
+            this.originalReportJson = null;
         }
 
         updateToolbarTitle(userDefinedTitle != null ? userDefinedTitle : currentTemplate.getName()); // Update toolbar with template name or loaded title
         setupClickListeners();
+        updateSaveButtonState(); // NEW: Set initial button state
     }
 
     @Override
@@ -388,6 +395,10 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
 
             setupFieldsFromTemplate(currentTemplate); // Populate UI with the loaded template's structure
             parseAndLoadReportData(savedReport.getReportData()); // Fill values from saved data
+
+            // NEW: Store the original report data for comparison
+            this.originalReportJson = savedReport.getReportData();
+            this.isDataModified = false; // Reset flag after loading
         } else {
             Log.e(TAG, "Report with ID " + reportId + " not found, falling back to default template.");
             currentTemplate = templateManager.getTemplate(TemplateManager.DEFAULT_TEMPLATE_ID);
@@ -398,6 +409,8 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
             }
             setupFieldsFromTemplate(currentTemplate);
             userDefinedTitle = currentTemplate.getName() + " - " + new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(new Date());
+            this.originalReportJson = null;
+            this.isDataModified = true; // New report is considered modified until first save
         }
     }
 
@@ -596,12 +609,48 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
                     }
                 }
             }
+
+            // NEW: Set flag and debounce button update
+            isDataModified = true;
+            debounceHandler.removeCallbacks(updateButtonRunnable);
+            debounceHandler.postDelayed(updateButtonRunnable, 500); // 500ms debounce
         }
     }
 
     private void setupClickListeners() {
         saveButton.setOnClickListener(v -> saveReport());
         sendButton.setOnClickListener(v -> saveAndPreviewReport()); // Changed to saveAndPreviewReport
+    }
+
+    // NEW: Helper method to check if the report data has changed
+    private boolean isReportModified(String currentJson) {
+        // If it's a new report, it is always considered modified (or new)
+        if (currentReportId == -1) return true;
+
+        // If originalReportJson is null, it means we couldn't load the original, so we assume modified for safety
+        if (originalReportJson == null) return true;
+
+        // Compare current JSON with the original loaded JSON
+        return !originalReportJson.equals(currentJson);
+    }
+
+    // NEW: Method to update the state of the save button
+    private void updateSaveButtonState() {
+        // Only perform the expensive JSON comparison if we think data might have changed
+        if (isDataModified || currentReportId == -1) {
+            String currentJson = generateReport();
+            boolean modified = isReportModified(currentJson);
+
+            saveButton.setEnabled(modified);
+
+            // If we found it's not modified, reset the flag
+            if (!modified) {
+                isDataModified = false;
+            }
+        } else {
+            // If flag is false and it's an existing report, button should be disabled
+            saveButton.setEnabled(false);
+        }
     }
 
     private void saveReport() {
@@ -631,13 +680,23 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
 
         if (currentReportId == -1) {
             currentReportId = reportDatabase.saveReport(title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId()); // NEW: Pass templateId
+            this.originalReportJson = reportJson; // Store the newly saved JSON
+            this.isDataModified = false; // Reset flag
             Log.d(TAG, "New report saved with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+            Toast.makeText(this, "Report saved successfully", Toast.LENGTH_SHORT).show();
         } else {
-            reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId()); // NEW: Pass templateId
-            Log.d(TAG, "Report updated with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+            if (isReportModified(reportJson)) { // CONDITIONAL SAVE
+                reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId()); // NEW: Pass templateId
+                this.originalReportJson = reportJson; // Update original only if save happened
+                this.isDataModified = false; // Reset flag
+                Log.d(TAG, "Report updated with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+                Toast.makeText(this, "Report saved successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d(TAG, "Report not modified. Skipping update.");
+                // Removed Toast
+            }
         }
-
-        Toast.makeText(this, "Report saved successfully", Toast.LENGTH_SHORT).show();
+        updateSaveButtonState(); // Update button state after save attempt
     }
 
     private void autoSaveReport() {
@@ -686,12 +745,21 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
         if (currentReportId == -1) {
             // Save as a new report
             currentReportId = reportDatabase.saveReport(title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
+            this.originalReportJson = reportJson; // Store the newly saved JSON
+            this.isDataModified = false; // Reset flag
             Log.d(TAG, "Auto-saved new report with ID: " + currentReportId);
         } else {
-            // Update existing report
-            reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
-            Log.d(TAG, "Auto-updated report with ID: " + currentReportId);
+            if (isReportModified(reportJson)) { // CONDITIONAL SAVE
+                // Update existing report
+                reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
+                this.originalReportJson = reportJson; // Update original only if save happened
+                this.isDataModified = false; // Reset flag
+                Log.d(TAG, "Auto-updated report with ID: " + currentReportId);
+            } else {
+                Log.d(TAG, "Auto-save skipped: Report not modified.");
+            }
         }
+        updateSaveButtonState(); // Update button state after auto-save attempt
     }
 
     // Renamed from saveAndSendReport to saveAndPreviewReport
@@ -740,13 +808,27 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
 
         String previewText = generatePreviewText();
 
+        boolean saved = false;
+
         if (currentReportId == -1) {
             currentReportId = reportDatabase.saveReport(title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
+            this.originalReportJson = reportJson;
+            this.isDataModified = false; // Reset flag
             Log.d(TAG, "New report saved with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+            saved = true;
         } else {
-            reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
-            Log.d(TAG, "Report updated with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+            if (isReportModified(reportJson)) { // CONDITIONAL SAVE
+                reportDatabase.updateReport(currentReportId, title, currentDateTime, previewText, reportJson, currentTemplate.getTemplateId());
+                this.originalReportJson = reportJson;
+                this.isDataModified = false; // Reset flag
+                Log.d(TAG, "Report updated with ID: " + currentReportId + " using template: " + currentTemplate.getTemplateId());
+                saved = true;
+            } else {
+                Log.d(TAG, "Preview save skipped: Report not modified.");
+            }
         }
+
+        updateSaveButtonState(); // Update button state after save attempt
 
         String readableReportForPreview = generateReadableReportForSms(); // Use the SMS format for preview
 
@@ -754,17 +836,20 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
         Intent intent = new Intent(this, ReportPreviewActivity.class);
         intent.putExtra("REPORT_TEXT", readableReportForPreview);
         startActivity(intent);
-        Toast.makeText(this, "Report saved and preview opened", Toast.LENGTH_SHORT).show();
+
+        // REMOVED: Toast.makeText(this, (saved ? "Report saved" : "Report not modified") + " and preview opened", Toast.LENGTH_SHORT).show();
     }
 
     private void highlightEmptyFields(List<ReportItem> emptyFields) {
-        for (ReportItem item : emptyFields) {
-            item.setError(true);
-            int position = reportItems.indexOf(item);
-            if (position != -1) {
-                reportAdapter.notifyItemChanged(position);
+        for (ReportItem item : reportItems) {
+            if (emptyFields.contains(item)) {
+                item.setError(true);
+            } else {
+                item.setError(false);
             }
         }
+        reportAdapter.notifyDataSetChanged();
+
         if (!emptyFields.isEmpty()) {
             int firstEmptyPos = reportItems.indexOf(emptyFields.get(0));
             if (firstEmptyPos != -1) {
@@ -803,7 +888,7 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
 
         // Handle the optional additional_notes line first to ensure it's removed if empty
         String notes = fieldValues.getOrDefault("additional_notes", "").trim();
-        
+
         // Remove the placeholder and its surrounding newline from the format string if notes are empty
         if (notes.isEmpty()) {
             // We use replaceAll to handle potential multi-line notes placeholder if the template format was complex
@@ -813,7 +898,7 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
             // The notes can contain newlines from the multi-line EditText.
             formatString = formatString.replace("{additional_notes}", notes);
         }
-        
+
         // Now run the standard replacement for all other placeholders.
         return replacePlaceholders(formatString, fieldValues);
     }
@@ -996,10 +1081,16 @@ public class ReportGeneratorActivity extends AppCompatActivity implements Report
             .setPositiveButton("OK", (dialog, which) -> {
                 String newTitle = input.getText().toString().trim();
                 if (!newTitle.isEmpty()) {
-                    userDefinedTitle = newTitle;
-                    updateToolbarTitle(userDefinedTitle);
-                    // Auto-save after title change
-                    autoSaveReport();
+                    // Check if title actually changed
+                    if (!newTitle.equals(userDefinedTitle)) {
+                        userDefinedTitle = newTitle;
+                        updateToolbarTitle(userDefinedTitle);
+                        // Set flag and update button state
+                        isDataModified = true;
+                        updateSaveButtonState();
+                        // Auto-save after title change
+                        autoSaveReport();
+                    }
                 } else {
                     Toast.makeText(this, "Title cannot be empty.", Toast.LENGTH_SHORT).show();
                 }
